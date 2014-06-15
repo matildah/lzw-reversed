@@ -25,9 +25,9 @@ struct lzwctx {
     size_t obuf_idx; 
 
     /* decoder state */
-    int numsymbols;
-    int symbolwidth; /* no, you can't derive this from numsymbols */
-    int lastsymbol;
+    unsigned int numsymbols;
+    unsigned int symbolwidth; /* no, you can't derive this from numsymbols */
+    unsigned int lastsymbol;
 
     /* status flags */
     int overfill;
@@ -35,7 +35,7 @@ struct lzwctx {
 
     /* accumulator state */
     uint32_t accumulator;
-    int bits_in_accumulator;
+    unsigned int bits_in_accumulator;
 };
 
 struct lzwctx *
@@ -85,6 +85,7 @@ obuf_push(uint8_t in, struct lzwctx *ctx)
     *(ctx->obuf + ctx->obuf_len) = in;
     ctx->obuf_len++;
 }
+
 
         
 int main()
