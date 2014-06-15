@@ -185,6 +185,7 @@ getclzw(struct lzwctx *ctx)
     
     /* handle special cases -- either the first symbol read or an overfill */
     if (1 == ctx->firstrun) {
+        ctx->firstrun = 0;
         symbol = getsymbol(ctx);
         if (1 == ctx->nomoresymbols) {
             return -1;
