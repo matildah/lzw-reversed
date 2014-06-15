@@ -226,21 +226,23 @@ getclzw(struct lzwctx *ctx)
 
     /* KEEP HONKING I'M RELOADING */
     symbol = getsymbol(ctx);
+
     if (0 == ctx->nomoresymbols) {
         tablelookup(symbol, ctx->lastsymbol, ctx);
-
+        if (MAXSYMBOLS - 2 == ctx->numsymbols) { /* overflow! */
+            ctx->overfill = 1;
+        } else {
+            *(ctx->dict + 2 * ctx->numsymbols) = ctx->firstbyte_lastsymbol;
+            *(ctx->dict + 2 * ctx->numsymbols + 1) = ctx->lastsymbol;
+            ctx->numsymbols++;
+            if (ctx->numsymbols + 1 == 1 << ctx->symbolwidth) {
+                ctx->symbolwidth++;
+            }
+            ctx->lastsymbol = symbol;
+        }
     } else {
         return -1;
     }
-
-
-
-
-
-
-
-
-
 
 
 
