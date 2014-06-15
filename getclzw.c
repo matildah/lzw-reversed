@@ -119,8 +119,8 @@ getsymbol(struct lzwctx *ctx)
     /* now that we have enough bits in our accumulator, we take a symbol out */
     accsave = ctx->accumulator;
 
-    ctx->accumulator &= ((1 << ctx->bits_in_accumulator) - 1);
     ctx->bits_in_accumulator -= ctx->symbolwidth;
+    ctx->accumulator &= ((1 << ctx->bits_in_accumulator) - 1);
 
     return accsave >> ctx->bits_in_accumulator;
 }
