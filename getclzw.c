@@ -1,6 +1,6 @@
 /* decompresses the LZW compression used by this awful software.
 
-   copyright (c) 2014 Matilda Helou <heinousbutch@gmail.com>. 
+   copyright (c) 2014 Kia
    licensed under the terms of the ISC license 
    */
 
