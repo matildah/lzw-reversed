@@ -234,7 +234,7 @@ getclzw(struct lzwctx *ctx)
             ctx->overfill = 1;
         } else {
             *(ctx->dict + 2 * ctx->numsymbols) = ctx->firstbyte_lastsymbol;
-            *(ctx->dict + 2 * ctx->numsymbols + 1) = ctx->lastsymbol;
+            *(ctx->dict + 2 * ctx->numsymbols + 1) = (uint64_t) (ctx->dict + 2 * ctx->lastsymbol);
             ctx->numsymbols++;
             if (ctx->numsymbols + 1 == 1 << ctx->symbolwidth) {
                 ctx->symbolwidth++;
