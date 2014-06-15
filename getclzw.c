@@ -91,10 +91,11 @@ obuf_push(uint8_t in, struct lzwctx *ctx)
 unsigned int
 pullsymbol(struct lzwctx *ctx)
 {
-    unsigned int temp, inbyte;
+    unsigned int inbyte;
+    uint32_t acctemp;
 
-    if (ctx->bits_in_accumulator < ctx->symbolwidth) { /* not enough bits in the accumulator,
-                                                          gotta reload! */
+    if (ctx->bits_in_accumulator < ctx->symbolwidth) { 
+        /* not enough bits in the accumulator, gotta reload! */
         while (ctx->bits_in_accumulator < ctx->symbolwidth) {
             
             inbyte = fgetc(ctx->fp);
@@ -103,18 +104,20 @@ pullsymbol(struct lzwctx *ctx)
                 return 0;
             }
 
-            ctx->accumulator = ctx->accumulator << 8 | inbyte;
+            /* bits come in through the right */
+            ctx->accumulator = ctx->accumulator << 8 | inbyte; 
             ctx->bits_in_accumulator += 8;
         }
     }
 
+    /* now that we have enough bits in our accumulator, we take a symbol out */
+    acctemp = ctx->accumulator;
 
+    ctx->accumulator &= ((1 << ctx->bits_in_accumulator) - 1);
+    ctx->bits_in_accumulator -= ctx->symbolwidth;
 
-
-
-                                                          
+    return acctemp >> ctx->bits_in_accumulator;
 }
-
         
 int main()
 {
