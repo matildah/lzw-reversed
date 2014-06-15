@@ -227,8 +227,7 @@ getclzw(struct lzwctx *ctx)
     /* KEEP HONKING I'M RELOADING */
     symbol = getsymbol(ctx);
     if (0 == ctx->nomoresymbols) {
-        tablelookup(
-
+        tablelookup(symbol, ctx->lastsymbol, ctx);
 
     } else {
         return -1;
