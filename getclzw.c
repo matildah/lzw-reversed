@@ -32,6 +32,7 @@ struct lzwctx {
     /* status flags */
     int overfill;
     int firstrun;
+    int eof_reached;
 
     /* accumulator state */
     uint32_t accumulator;
@@ -56,8 +57,9 @@ initLZW(char *path)
     lzw->numsymbols = 256;
     lzw->symbolwidth = 9;
 
-    lzw->overfill = 0;
     lzw->firstrun = 1;
+    lzw->overfill = 0;
+    lzw->eof_reached = 0;
 
     lzw->accumulator = 0;
     lzw->bits_in_accumulator = 0;
@@ -86,11 +88,37 @@ obuf_push(uint8_t in, struct lzwctx *ctx)
     ctx->obuf_len++;
 }
 
+unsigned int
+pullsymbol(struct lzwctx *ctx)
+{
+    unsigned int temp, inbyte;
+
+    if (ctx->bits_in_accumulator < ctx->symbolwidth) { /* not enough bits in the accumulator,
+                                                          gotta reload! */
+        while (ctx->bits_in_accumulator < ctx->symbolwidth) {
+            
+            inbyte = fgetc(ctx->fp);
+            if (EOF == inbyte) {
+                ctx->eof_reached = 1;
+                return 0;
+            }
+
+            ctx->accumulator = ctx->accumulator << 8 | inbyte;
+            ctx->bits_in_accumulator += 8;
+        }
+    }
+
+
+
+
+
+                                                          
+}
 
         
 int main()
 {
     struct lzwctx * foo;
-    foo = initLZW();
+    foo = initLZW("bar");
 }
 
