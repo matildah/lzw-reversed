@@ -43,47 +43,48 @@ struct lzwctx {
 struct lzwctx *
 initLZW(char *path)
 {
-    struct lzwctx *lzw;
+    struct ctxctx *ctx;
     int i;
 
-    lzw = malloc(sizeof(struct lzwctx));
-    assert(NULL != lzw);
+    ctx = malloc(sizeof(struct ctxctx));
+    assert(NULL != ctx);
 
-    lzw->fp = fopen(path, "r");
-    assert(NULL != lzw->fp);
+    ctx->fp = fopen(path, "r");
+    assert(NULL != ctx->fp);
 
-    lzw->dict = malloc(MAXSYMBOLS * 2 * 8);
-    assert(NULL != lzw->dict);
+    ctx->dict = malloc(MAXSYMBOLS * 2 * 8);
+    assert(NULL != ctx->dict);
 
-    lzw->obuf = malloc(OBUF_LEN);
-    assert(NULL != lzw->obuf);
+    ctx->obuf = malloc(OBUF_LEN);
+    assert(NULL != ctx->obuf);
 
-    lzw->obuf_len = 0;
-    lzw->obuf_idx = 0;
+    ctx->obuf_len = 0;
+    ctx->obuf_idx = 0;
 
-    lzw->numsymbols = 256;
-    lzw->symbolwidth = 9;
-    lzw->lastsymbol = 0;
+    ctx->numsymbols = 256;
+    ctx->symbolwidth = 9;
+    ctx->lastsymbol = 0;
+    ctx->firstbyte_lastsymbol = 0;
 
-    lzw->overfill = 0;
-    lzw->firstrun = 1;
-    lzw->eof_reached = 0;
+    ctx->overfill = 0;
+    ctx->firstrun = 1;
+    ctx->eof_reached = 0;
 
-    lzw->accumulator = 0;
-    lzw->bits_in_accumulator = 0;
+    ctx->accumulator = 0;
+    ctx->bits_in_accumulator = 0;
 
     for (i = 0; i < MAXSYMBOLS; i++) {
         if (i < 256) {
-            *(lzw->dict + i * 2) = i;               /* byte */
+            *(ctx->dict + i * 2) = i;               /* byte */
         } else {
-            *(lzw->dict + i * 2) = 0;               /* byte */
+            *(ctx->dict + i * 2) = 0;               /* byte */
         }
 
-        *(lzw->dict + i * 2 + 1) = 0;           /* pointer */
+        *(ctx->dict + i * 2 + 1) = 0;           /* pointer */
     }
     
 
-    return lzw;
+    return ctx;
 }
 
 void
@@ -157,9 +158,36 @@ tablelookup(uint8_t fb_ls, unsigned int cursymbol, unsigned int prevsymbol, stru
 
 
 
+unsigned int
+getclzw(struct lzwctx *ctx)
+{
+    unsigned int symbol;
 
+    if (1 == ctx->firstrun) {
+        symbol = getsymbol(ctx);
+        if (1 == ctx->eof_reached) {
+            return -1;
+        }
+        
+        ctx->lastsymbol = symbol;
+        ctx->firstbyte_lastsymbol = tablelookup(ctx->firstbyte_lastsymbol, symbol, symbol, ctx);
+    } else if (1 == overfill) {
+        ctx->overfill = 0;
+        /* clear the dictionary */
+        for (i = 0; i < MAXSYMBOLS; i++) {
+            if (i < 256) {
+                *(ctx->dict + i * 2) = i;               /* byte */
+            } else {
+                *(ctx->dict + i * 2) = 0;               /* byte */
+            }
 
+            *(ctx->dict + i * 2 + 1) = 0;           /* pointer */
+        }
 
+        ctx->numsymbols = 256;
+        ctx->symbolwidth = 9;
+
+        if (0 == ctx->
 
 
 
