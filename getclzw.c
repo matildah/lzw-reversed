@@ -28,6 +28,7 @@ struct lzwctx {
     unsigned int numsymbols;
     unsigned int symbolwidth; /* no, you can't derive this from numsymbols */
     unsigned int lastsymbol;
+    uint8_t firstbyte_lastsymbol;
 
     /* status flags */
     int overfill;
@@ -94,10 +95,10 @@ obuf_push(uint8_t in, struct lzwctx *ctx)
 }
 
 unsigned int
-pullsymbol(struct lzwctx *ctx)
+getsymbol(struct lzwctx *ctx)
 {
     unsigned int inbyte;
-    uint32_t acctemp;
+    uint32_t accsave;
 
     if (ctx->bits_in_accumulator < ctx->symbolwidth) { 
         /* not enough bits in the accumulator, gotta reload! */
@@ -116,12 +117,12 @@ pullsymbol(struct lzwctx *ctx)
     }
 
     /* now that we have enough bits in our accumulator, we take a symbol out */
-    acctemp = ctx->accumulator;
+    accsave = ctx->accumulator;
 
     ctx->accumulator &= ((1 << ctx->bits_in_accumulator) - 1);
     ctx->bits_in_accumulator -= ctx->symbolwidth;
 
-    return acctemp >> ctx->bits_in_accumulator;
+    return accsave >> ctx->bits_in_accumulator;
 }
 
 void
@@ -135,6 +136,32 @@ pullstring(uint64_t *start, uint8_t *firstbyte, struct lzwctx *ctx)
         *firstbyte = (uint8_t) *start;
     }
 }
+
+uint8_t
+tablelookup(uint8_t fb_ls, unsigned int cursymbol, unsigned int prevsymbol, struct lzwctx *ctx)
+{
+    uint8_t rval;
+
+    if (cursymbol == ctx->numsymbols) { /* known unknown symbol */
+        pullstring(ctx->dict + 2 * prevsymbol, &rval, ctx);
+        obuf_push(fb_ls, ctx);
+    } else if (cursymbol < ctx->numsymbols) { /* known symbol */
+        pullstring(ctx->dict + 2 * cursymbol, &rval, ctx);
+    } else /* unknown unknown symbol, take a shit in the bed */
+    {
+        assert(0);
+    }
+    
+    return rval;
+}
+
+
+
+
+
+
+
+
 
 
 
