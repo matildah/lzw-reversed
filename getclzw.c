@@ -8,11 +8,13 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#define MAXSYMBOLS 4096
+
 struct lzwctx {
     /* buffers */
-    uint8_t *dict;
+    uint64_t *dict;
     /* dict is arranged as such:
-       [uint32_t byte] [uint32_t pointer] */
+       [uint64_t databyte] [uint64_t pointer] */
 
     uint8_t *obuf;
     size_t obuf_len;
@@ -36,11 +38,12 @@ struct lzwctx *
 initLZW()
 {
     struct lzwctx *lzw;
+    int i;
 
     lzw = malloc(sizeof(struct lzwctx));
     assert(NULL != lzw);
 
-    lzw->dict = malloc(32768); /* yes, i am writing this on a 64 bit machine. #yolo */
+    lzw->dict = malloc(MAXSYMBOLS * 2 * 8);
     assert(NULL != lzw->dict);
 
     lzw->obuf = malloc(8192);
@@ -54,28 +57,23 @@ initLZW()
 
     lzw->accumulator = 0;
     lzw->bits_in_accumulator = 0;
-    
+
+    for (i = 0; i < MAXSYMBOLS; i++) {
+        if (i < 256) {
+            *(lzw->dict + i * 2) = i;               /* byte */
+        } else {
+            *(lzw->dict + i * 2) = 0;               /* byte */
+        }
+
+        *(lzw->dict + i * 2 + 1) = 0;           /* pointer */
+    }
+
     return lzw;
 }
 
 int main()
 {
-    uint8_t *buf_32, *buf_16;
-
-    uint8_t *buf_32768_ptr = malloc(32768);
-    uint8_t *v4 = malloc(16384);
-
-    buf_32 = buf_32768_ptr;
-    buf_16 = v4;
-    int v2 = 0;
-    do
-    {
-        *(uint32_t *)(v4 + 4 * v2) = buf_32768_ptr;
-        if ( 256 > v2 )
-            *(uint16_t *)buf_32768_ptr = v2;
-        *(uint32_t *)(*(uint32_t *)(v4 + 4 * v2++) + 4) = 0;
-        buf_32768_ptr = (char *)buf_32768_ptr + 8;
-    }
-    while ( 4096 > v2 );
+    struct lzwctx * foo;
+    foo = initLZW();
 }
 
