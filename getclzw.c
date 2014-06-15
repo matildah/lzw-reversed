@@ -21,8 +21,8 @@ struct lzwctx {
        [uint64_t databyte] [uint64_t pointer] */
 
     uint8_t *obuf;
-    size_t obuf_len; /* how many bytes we've put in */
-    size_t obuf_idx; 
+    size_t obuf_len; /* index for writing */
+    size_t obuf_idx; /* index for reading */
 
     /* decoder state */
     unsigned int numsymbols;
@@ -96,6 +96,24 @@ obuf_push(uint8_t in, struct lzwctx *ctx)
     assert(ctx->obuf_len != OBUF_LEN - 1);
     *(ctx->obuf + ctx->obuf_len) = in;
     ctx->obuf_len++;
+}
+
+unsigned int /* so we can return -1 and not confuse it with 0xff */
+obuf_pull(struct lzwctx *ctx)
+{
+    uint8_t rval;
+    if (ctx->obuf_idx >= ctx->obuf_len) {
+        return -1;
+    }
+
+    rval = *(ctx->obuf + ctx->obuf_idx);
+    ctx->obuf_idx++;
+
+    if (ctx->obuf_idx == ctx->obuf_len) {
+        ctx->obuf_idx = 0;
+        ctx->obuf_len = 0;
+    }
+    return rval;
 }
 
 unsigned int
@@ -196,6 +214,11 @@ getclzw(struct lzwctx *ctx)
             ctx->firstbyte_lastsymbol = tablelookup(ctx->firstbyte_lastsymbol, symbol, symbol, ctx);
         }
     } /* (1 == ctx->overfill) */
+
+
+
+
+
 }
 
 
