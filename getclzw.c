@@ -109,7 +109,7 @@ getsymbol(struct lzwctx *ctx)
             inbyte = fgetc(ctx->fp);
             if (EOF == inbyte) {
                 ctx->nomoresymbols = 1;
-                return 0;
+                return -1;
             }
 
             /* bits come in through the right */
