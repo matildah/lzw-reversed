@@ -147,8 +147,7 @@ tablelookup(uint8_t fb_ls, unsigned int cursymbol, unsigned int prevsymbol, stru
         obuf_push(fb_ls, ctx);
     } else if (cursymbol < ctx->numsymbols) { /* known symbol */
         pullstring(ctx->dict + 2 * cursymbol, &rval, ctx);
-    } else /* unknown unknown symbol, take a shit in the bed */
-    {
+    } else { /* unknown unknown symbol, take a shit in the bed */
         assert(0);
     }
     
