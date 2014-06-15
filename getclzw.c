@@ -123,7 +123,21 @@ pullsymbol(struct lzwctx *ctx)
 
     return acctemp >> ctx->bits_in_accumulator;
 }
-        
+
+void
+pullstring(uint64_t *start, uint8_t *firstbyte, struct lzwctx *ctx)
+{
+    if (0 != *(start + 1)) {
+        pullstring((uint64_t *) *(start + 1), firstbyte, ctx);
+        obuf_push((uint8_t) *(start), ctx);
+    } else {
+        obuf_push((uint8_t) *(start), ctx);
+        *firstbyte = (uint8_t) *start;
+    }
+}
+
+
+
 int main()
 {
     struct lzwctx * foo;
