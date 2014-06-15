@@ -46,10 +46,10 @@ struct lzwctx {
 struct lzwctx *
 initLZW(char *path)
 {
-    struct ctxctx *ctx;
+    struct lzwctx *ctx;
     int i;
 
-    ctx = malloc(sizeof(struct ctxctx));
+    ctx = malloc(sizeof(struct lzwctx));
     assert(NULL != ctx);
 
     ctx->fp = fopen(path, "r");
@@ -164,7 +164,7 @@ tablelookup(uint8_t fb_ls, unsigned int cursymbol, unsigned int prevsymbol, stru
 unsigned int
 getclzw(struct lzwctx *ctx)
 {
-    unsigned int symbol;
+    unsigned int symbol, i;
 
     if (1 == ctx->firstrun) {
         symbol = getsymbol(ctx);
@@ -174,7 +174,7 @@ getclzw(struct lzwctx *ctx)
         
         ctx->lastsymbol = symbol;
         ctx->firstbyte_lastsymbol = tablelookup(ctx->firstbyte_lastsymbol, symbol, symbol, ctx);
-    } else if (1 == overfill) {
+    } else if (1 == ctx->overfill) {
         ctx->overfill = 0;
         /* clear the dictionary */
         for (i = 0; i < MAXSYMBOLS; i++) {
@@ -194,6 +194,10 @@ getclzw(struct lzwctx *ctx)
         if (0 == ctx->nomoresymbols) {
             ctx->lastsymbol = symbol;
             ctx->firstbyte_lastsymbol = tablelookup(ctx->firstbyte_lastsymbol, symbol, symbol, ctx);
+        }
+    }
+}
+
 
 
 int main()
