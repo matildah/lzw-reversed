@@ -255,9 +255,17 @@ getclzw(struct lzwctx *ctx)
 
 
 
-int main()
+int main(int argc, char **argv)
 {
-    struct lzwctx * foo;
-    foo = initLZW("bar");
+    struct lzwctx * ctx;
+    unsigned int foo;
+
+    assert(2 == argc);
+
+    ctx = initLZW(argv[1]);
+    while ((foo = getclzw(ctx)) != -1) {
+        putchar(foo);
+    }
+
 }
 
