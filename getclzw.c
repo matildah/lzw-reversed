@@ -34,7 +34,9 @@ struct lzwctx {
     int overfill;
     int firstrun;
     int nomoresymbols; /* the semantics of this are slightly different than those of 
-                          eof_reached in the original program */
+                          eof_reached in the original program, we can have reached the
+                          EOF of the file but if we still have bits in the accumulator, 
+                          nomoresymbols will still be zero */
 
     /* accumulator state */
     uint32_t accumulator;
