@@ -33,7 +33,8 @@ struct lzwctx {
     /* status flags */
     int overfill;
     int firstrun;
-    int eof_reached;
+    int nomoresymbols; /* the semantics of this are slightly different than those of 
+                          eof_reached in the original program */
 
     /* accumulator state */
     uint32_t accumulator;
@@ -68,7 +69,7 @@ initLZW(char *path)
 
     ctx->overfill = 0;
     ctx->firstrun = 1;
-    ctx->eof_reached = 0;
+    ctx->nomoresymbols = 0;
 
     ctx->accumulator = 0;
     ctx->bits_in_accumulator = 0;
@@ -107,7 +108,7 @@ getsymbol(struct lzwctx *ctx)
             
             inbyte = fgetc(ctx->fp);
             if (EOF == inbyte) {
-                ctx->eof_reached = 1;
+                ctx->nomoresymbols = 1;
                 return 0;
             }
 
@@ -165,7 +166,7 @@ getclzw(struct lzwctx *ctx)
 
     if (1 == ctx->firstrun) {
         symbol = getsymbol(ctx);
-        if (1 == ctx->eof_reached) {
+        if (1 == ctx->nomoresymbols) {
             return -1;
         }
         
@@ -187,9 +188,10 @@ getclzw(struct lzwctx *ctx)
         ctx->numsymbols = 256;
         ctx->symbolwidth = 9;
 
-        if (0 == ctx->
-
-
+        symbol = getsymbol(ctx);
+        if (0 == ctx->nomoresymbols) {
+            ctx->lastsymbol = symbol;
+            ctx->firstbyte_lastsymbol = tablelookup(ctx->firstbyte_lastsymbol, symbol, symbol, ctx);
 
 
 int main()
