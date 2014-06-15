@@ -111,7 +111,7 @@ getsymbol(struct lzwctx *ctx)
             }
 
             /* bits come in through the right */
-            ctx->accumulator = ctx->accumulator << 8 | inbyte; 
+            ctx->accumulator = (ctx->accumulator << 8) | inbyte; 
             ctx->bits_in_accumulator += 8;
         }
     }
