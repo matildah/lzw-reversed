@@ -245,6 +245,11 @@ getclzw(struct lzwctx *ctx)
     }
 
 
+    if (ctx->obuf_idx < ctx->obuf_len) {
+        return obuf_pull(ctx);
+    } else {
+        return -1;
+    }
 
 }
 
