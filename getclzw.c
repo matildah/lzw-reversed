@@ -7,11 +7,14 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <stdio.h>
 
 #define MAXSYMBOLS 4096
 #define OBUF_LEN 8192
 
 struct lzwctx {
+    FILE *fp;
+
     /* buffers */
     uint64_t *dict;
     /* dict is arranged as such:
@@ -36,7 +39,7 @@ struct lzwctx {
 };
 
 struct lzwctx *
-initLZW()
+initLZW(char *path)
 {
     struct lzwctx *lzw;
     int i;
@@ -68,6 +71,9 @@ initLZW()
 
         *(lzw->dict + i * 2 + 1) = 0;           /* pointer */
     }
+    
+    lzw->fp = fopen(path, "r");
+    assert(NULL != lzw->fp);
 
     return lzw;
 }
