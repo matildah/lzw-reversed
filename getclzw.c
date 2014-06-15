@@ -98,13 +98,11 @@ obuf_push(uint8_t in, struct lzwctx *ctx)
     ctx->obuf_len++;
 }
 
-unsigned int /* so we can return -1 and not confuse it with 0xff */
+uint8_t
 obuf_pull(struct lzwctx *ctx)
 {
     uint8_t rval;
-    if (ctx->obuf_idx >= ctx->obuf_len) {
-        return -1;
-    }
+    assert(ctx->obuf_idx < ctx->obuf_len);
 
     rval = *(ctx->obuf + ctx->obuf_idx);
     ctx->obuf_idx++;
@@ -160,18 +158,19 @@ pullstring(uint64_t *start, uint8_t *firstbyte, struct lzwctx *ctx)
 }
 
 uint8_t
-tablelookup(uint8_t fb_ls, unsigned int cursymbol, unsigned int prevsymbol, struct lzwctx *ctx)
+tablelookup(unsigned int cursymbol, unsigned int prevsymbol, struct lzwctx *ctx)
 {
     uint8_t rval;
 
     if (cursymbol == ctx->numsymbols) { /* known unknown symbol */
         pullstring(ctx->dict + 2 * prevsymbol, &rval, ctx);
-        obuf_push(fb_ls, ctx);
+        obuf_push(ctx->firstbyte_lastsymbol, ctx);
     } else if (cursymbol < ctx->numsymbols) { /* known symbol */
         pullstring(ctx->dict + 2 * cursymbol, &rval, ctx);
     } else { /* unknown unknown symbol, take a shit in the bed */
         assert(0);
     }
+    ctx->firstbyte_lastsymbol = rval;
     
     return rval;
 }
@@ -183,7 +182,8 @@ unsigned int
 getclzw(struct lzwctx *ctx)
 {
     unsigned int symbol, i;
-
+    
+    /* handle special cases -- either the first symbol read or an overfill */
     if (1 == ctx->firstrun) {
         symbol = getsymbol(ctx);
         if (1 == ctx->nomoresymbols) {
@@ -191,7 +191,7 @@ getclzw(struct lzwctx *ctx)
         }
         
         ctx->lastsymbol = symbol;
-        ctx->firstbyte_lastsymbol = tablelookup(ctx->firstbyte_lastsymbol, symbol, symbol, ctx);
+        tablelookup(symbol, symbol, ctx);
     } else if (1 == ctx->overfill) {
         ctx->overfill = 0;
         /* clear the dictionary */
@@ -211,9 +211,35 @@ getclzw(struct lzwctx *ctx)
         symbol = getsymbol(ctx);
         if (0 == ctx->nomoresymbols) {
             ctx->lastsymbol = symbol;
-            ctx->firstbyte_lastsymbol = tablelookup(ctx->firstbyte_lastsymbol, symbol, symbol, ctx);
+            tablelookup(symbol, symbol, ctx);
         }
     } /* (1 == ctx->overfill) */
+    /* end of special cases */
+
+    if (ctx->obuf_idx < ctx->obuf_len) {
+        return obuf_pull(ctx);
+    }
+    
+    if (1 == ctx->nomoresymbols) {
+        return -1;
+    }
+
+    /* KEEP HONKING I'M RELOADING */
+    symbol = getsymbol(ctx);
+    if (0 == ctx->nomoresymbols) {
+        tablelookup(
+
+
+    } else {
+        return -1;
+    }
+
+
+
+
+
+
+
 
 
 
