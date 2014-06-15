@@ -48,17 +48,24 @@ initLZW(char *path)
     lzw = malloc(sizeof(struct lzwctx));
     assert(NULL != lzw);
 
+    lzw->fp = fopen(path, "r");
+    assert(NULL != lzw->fp);
+
     lzw->dict = malloc(MAXSYMBOLS * 2 * 8);
     assert(NULL != lzw->dict);
 
     lzw->obuf = malloc(OBUF_LEN);
     assert(NULL != lzw->obuf);
 
+    lzw->obuf_len = 0;
+    lzw->obuf_idx = 0;
+
     lzw->numsymbols = 256;
     lzw->symbolwidth = 9;
+    lzw->lastsymbol = 0;
 
-    lzw->firstrun = 1;
     lzw->overfill = 0;
+    lzw->firstrun = 1;
     lzw->eof_reached = 0;
 
     lzw->accumulator = 0;
@@ -74,8 +81,6 @@ initLZW(char *path)
         *(lzw->dict + i * 2 + 1) = 0;           /* pointer */
     }
     
-    lzw->fp = fopen(path, "r");
-    assert(NULL != lzw->fp);
 
     return lzw;
 }
