@@ -9,6 +9,7 @@
 #include <assert.h>
 
 #define MAXSYMBOLS 4096
+#define OBUF_LEN 8192
 
 struct lzwctx {
     /* buffers */
@@ -17,8 +18,8 @@ struct lzwctx {
        [uint64_t databyte] [uint64_t pointer] */
 
     uint8_t *obuf;
-    size_t obuf_len;
-    size_t obuf_idx;
+    size_t obuf_len; /* how many bytes we've put in */
+    size_t obuf_idx; 
 
     /* decoder state */
     int numsymbols;
@@ -46,7 +47,7 @@ initLZW()
     lzw->dict = malloc(MAXSYMBOLS * 2 * 8);
     assert(NULL != lzw->dict);
 
-    lzw->obuf = malloc(8192);
+    lzw->obuf = malloc(OBUF_LEN);
     assert(NULL != lzw->obuf);
 
     lzw->numsymbols = 256;
@@ -71,6 +72,15 @@ initLZW()
     return lzw;
 }
 
+void
+obuf_push(uint8_t in, struct lzwctx *ctx)
+{
+    assert(ctx->obuf_len != OBUF_LEN - 1);
+    *(ctx->obuf + ctx->obuf_len) = in;
+    ctx->obuf_len++;
+}
+
+        
 int main()
 {
     struct lzwctx * foo;
