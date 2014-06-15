@@ -195,7 +195,7 @@ getclzw(struct lzwctx *ctx)
             ctx->lastsymbol = symbol;
             ctx->firstbyte_lastsymbol = tablelookup(ctx->firstbyte_lastsymbol, symbol, symbol, ctx);
         }
-    }
+    } /* (1 == ctx->overfill) */
 }
 
 
